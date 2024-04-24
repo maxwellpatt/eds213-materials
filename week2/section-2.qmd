@@ -1,0 +1,9 @@
+
+```{r}
+library(duckdb)
+```
+
+```{r}
+con <- dbConnect(duckdb())
+```
+

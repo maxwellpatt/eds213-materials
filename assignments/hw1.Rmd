@@ -1,0 +1,58 @@
+---
+output:
+  pdf_document: default
+---
+
+```{r, message=FALSE}
+library(tidyverse)
+library(dplyr)
+library(here)
+```
+
+
+```{r, message=FALSE}
+# Read in data
+snow_survey <- read_csv(here('week1', 'ASDN_Snow_survey.csv'))
+```
+```{sql connection=}
+CREATE TABLE Snow_survey (
+    Site TEXT NOT NULL REFERENCES Site(Site),
+    Year INTEGER NOT NULL CHECK (Year >= 1900 AND Year <= 2100)),
+    Date DATE NOT NULL,
+    Plot TEXT NOT NULL,
+    Location TEXT NOT NULL,
+    Snow_cover REAL NOT NULL CHECK (Snow_cover BETWEEN 0 AND 100),
+    Water_cover REAL NOT NULL CHECK (Water_cover BETWEEN 0 AND 100), 
+    Land_cover REAL NOT NULL CHECK (Land_cover BETWEEN 0 AND 100),
+    Total_cover REAL NOT NULL CHECK (Total_cover = Snow_cover + Water_cover + Land_cover),
+    Observer TEXT NOT NULL REFERENCES Personnel(Name),
+    Notes TEXT,
+    PRIMARY KEY (Site, Year, Date, Plot, Location),
+    FOREIGN KEY (Site) REFERENCES Site(Code),
+    FOREIGN KEY (Observer) REFERENCES Personnel(Name)
+);
+```
+
+Process:
+
+Selected appropriate data types based on the nature of the data:
+- TEXT for string values (Site, Plot, Location, Observer, and Notes)
+- INTEGER for Year, since years are whole numbers
+- DATE for the Date column to store date values properly
+- REAL for Snow_cover, Water_cover, Land_cover, and Total_cover to store decimal values
+
+Defined a composite primary key consisting of Site, Year, Date, Plot, and Location to uniquely identify each record in the table
+
+Added foreign key constraints referencing the Site(Code) and Personnel(Abbreviation) columns to ensure integrity and create a connection with the Site and Personnel tables
+
+Specified NOT NULL constraints for all columns but Notes to ensure data completeness 
+
+Added CHECK constraints for Snow_cover, Water_cover, and Land_cover to validate that the values fall within the range of 0 to 100 as a percentage
+
+Included a CHECK constraint for Total_cover to make sure the total land cover equals the sum of snow, water, and land covers.
+
+Uncertainties:
+
+Do the Plot and Location columns follow a specific format or pattern? If so this could be accounted for in the table
+
+
