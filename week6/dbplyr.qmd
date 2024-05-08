@@ -1,0 +1,65 @@
+
+```{r}
+library(tidyverse)
+library(DBI)
+library(dbplyr)
+library(duckdb)
+```
+
+
+# Connect to database
+
+```{r}
+con <- DBI::dbConnect(duckdb::duckdb(), dbdir = "../week3/database.db")
+```
+
+
+```{r}
+DBI::dbListTables(con)
+```
+
+
+```{r}
+species <- tbl(con, "Species")
+```
+
+
+SQL query
+
+```{r}
+df <- dbGetQuery(con, "SELECT * FROM Species WHERE Code LIKE 'a%'")
+df
+```
+## dbplyr
+
+```{r}
+species %>% 
+  filter(Relevance == "Study species") %>% 
+  select(Code, Scientific_name) %>% 
+  show_query()
+```
+
+## Group by relevance and count the number of species in each group (using species)
+
+```{r}
+species_group <- species %>% 
+  group_by(Relevance) %>% 
+  summarise(species_count = n()) %>% 
+  arrange(-species_count)
+```
+
+
+```{r}
+eggs_db <- tbl(con, "Bird_eggs")
+nests_db <- tbl(con, "Bird_nests")
+```
+
+
+```{r}
+nests_db %>% 
+  left_join(eggs_db, nests_db, by = c("Nest_ID", "Year", "Site", "Book_page")) %>% 
+  show_query()
+```
+
+
+
