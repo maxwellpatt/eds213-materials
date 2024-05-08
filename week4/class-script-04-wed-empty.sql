@@ -11,28 +11,49 @@
 
 
 -- Ask 1: What is the average snow cover at each site?
-
+SELECT Site, AVG(Snow_cover) FROM Snow_cover
+  GROUP BY Site;
 
 -- Ask 2: Order the result to get the top 3 snowy sites?
+SELECT Site, AVG(Snow_cover) AS snow_avg FROM Snow_cover
+  GROUP BY Site
+  ORDER BY snow_avg DESC
+  LIMIT 3;
 
 
 -- Ask 3: Save your results into a temporary table named  Site_avg_snowcover
-
+CREATE temp TABLE Site_avg_snowcover AS
+  SELECT Site, AVG(Snow_cover) AS snow_avg FROM Snow_cover
+  GROUP BY Site
+  ORDER BY snow_avg DESC
+  LIMIT 3;
+  
 
 -- Ask 4: How do I check the view was created?
+SELECT * FROM Site_avg_snowcover
 
 
 -- Ask 5: Looking at the data, we have now a doubt about the meaning of the zero values... what if most of them where supposed to be NULL?! Does it matters? write a query that would check that?
-
+SELECT Site, AVG(Snow_cover) AS snow_avg FROM Snow_cover
+  WHERE Snow_cover > 0
+  GROUP BY Site;
 
 -- Ask 6: Save your results into a **view** named  Site_avg_snowcover_nozeros
-
+CREATE VIEW Site_avg_snowcover_nozeros AS SELECT Site, AVG(Snow_cover) AS snow_avg FROM Snow_cover
+  WHERE Snow_cover > 0
+  GROUP BY Site;
 
 -- Ask 7: Compute the difference between those two ways of computing average
-
+SELECT Site, Site_avg_snowcover_nozeros.snow_avg  - Site_avg_snowcover.snow_avg as avg_diff
+  FROM Site_avg_snowcover
+  JOIN Site_avg_snowcover_nozeros USING (Site);
 
 -- Ask 8: Which site would be the most impacted if zeros were not real zeros? Of Course we need a table for that :)
-
+SELECT Site, Site_avg_snowcover_nozeros.snow_avg  - Site_avg_snowcover.snow_avg as avg_diff
+  FROM Site_avg_snowcover
+  JOIN Site_avg_snowcover_nozeros USING (Site)
+  ORDER BY avg_diff DESC
+  LIMIT 1;
 
 -- Ask 9: So? Would it be time well spent to further look into the meaning of zeros?
 
@@ -51,7 +72,14 @@ SELECT * FROM Snow_cover WHERE Location = 'sno05';
 -- We should probably recompute the avg, let's check
 SELECT * FROM Site_avg_snowcover;
 -- What just happened!?
+CREATE VIEW Site_Avg_snowcover_new AS
+  SELECT SITE, AVG(Snow_cover) AS avg_cover FROM Snow_cover
+  GROUP BY Site
+  ORDER BY avg_cover DESC
+  LIMIT 3;
+
 
 
 -- Ask 10: Let's move on to inspecting the nests and answering the following question: Which shorebird species makes the most eggs? Oh and I need a table with the common names, just because :)
-
+SELECT Site, Year, AVG(Snow_cover) FROM 
+  Snow_cover GROUP BY (Site, Year);
