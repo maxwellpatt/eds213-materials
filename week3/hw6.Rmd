@@ -1,0 +1,41 @@
+---
+title: "HW 6"
+author: "Maxwell Patterson"
+date: "2024-05-24"
+---
+
+```{r}
+library(dplyr)
+library(dbplyr)
+library(DBI)
+library(duckdb)
+library(tidyverse)
+```
+
+```{r}
+# Connect to the database
+conn <- DBI::dbConnect(duckdb::duckdb(), "database.db")
+
+# Load tables 
+egg_table <- tbl(conn, "Bird_eggs")
+nest_table <- tbl(conn, "Bird_nests")
+```
+
+```{r}
+# Join the tables and summarize to get total eggs per observer
+result <- egg_table %>%
+  inner_join(nest_table, by = c("Nest_ID" = "Nest_ID")) %>%
+  group_by(Observer) %>%
+  summarize(total_eggs = n()) %>%
+  arrange(desc(total_eggs)) %>%
+  head(3)
+
+# Print output
+cat("# Ordered by: desc(total_eggs)\n")
+print(collect(result))
+
+# Show the query
+show_query(result)
+```
+
+Based on the output, dbplyr managed to execute the entire operation in a single SQL query without making a temporary table. The result tell us that dbplyr used SQL LIMIT to limit the output to the first three rows instead of relying on an R tool for limiting the output. This approach shows dbplyr's ability to push down computations to the database engine and perform queries efficiently.
